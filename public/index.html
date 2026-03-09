@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>零点灯室 — AI推理游戏</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ========== 开始画面 ========== -->
+  <div id="start-screen" class="screen active">
+    <div class="start-content">
+      <div class="lighthouse-icon">🏮</div>
+      <h1>零 点 灯 室</h1>
+      <p class="subtitle">台风夜 · 孤岛旅馆 · 六个嫌疑人</p>
+      <p class="desc">
+        十五年前，一个叫顾湛的年轻人从灯室中消失。<br>
+        十五年后，旧人重聚。<br>
+        你是受邀的侦探。<br>
+        零点之前，找出真相。
+      </p>
+      <button id="btn-start" class="btn-primary">开始游戏</button>
+    </div>
+  </div>
+
+  <!-- ========== 游戏主界面 ========== -->
+  <div id="game-screen" class="screen">
+    <!-- 顶栏 -->
+    <header id="top-bar">
+      <div class="top-left">
+        <span class="game-title">零点灯室</span>
+        <span id="stage-badge" class="badge"></span>
+      </div>
+      <div class="top-right">
+        <button id="btn-theory" class="btn-outline" title="提交你的推理">🔍 提交推理</button>
+        <button id="btn-advance" class="btn-danger" title="放弃本阶段调查，推进剧情">⚡ 推进剧情</button>
+      </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <div id="main-content">
+      <!-- 左侧 — 角色列表 + 线索 + 助手 -->
+      <aside id="sidebar">
+        <!-- 侧边栏标签页 -->
+        <div id="sidebar-tabs">
+          <button class="sidebar-tab active" data-tab="tab-chars">👥 人物</button>
+          <button class="sidebar-tab" data-tab="tab-clues">🔎 线索</button>
+        </div>
+
+        <!-- 人物标签页 -->
+        <div id="tab-chars" class="sidebar-content active">
+          <div id="character-list"></div>
+          <div id="dead-list">
+            <h4>已死亡</h4>
+            <div id="dead-characters"></div>
+          </div>
+        </div>
+
+        <!-- 线索标签页 -->
+        <div id="tab-clues" class="sidebar-content">
+          <div id="clue-list"></div>
+          <p id="clue-empty" class="hint-text" style="padding:1rem">暂无线索</p>
+        </div>
+
+        <!-- 助手按钮 -->
+        <div id="assistant-toggle">
+          <button id="btn-assistant" class="btn-assistant">🤖 侦探助手</button>
+        </div>
+      </aside>
+
+      <!-- 中间 — 叙事/对话/助手 -->
+      <main id="center-panel">
+        <!-- 叙事面板 -->
+        <div id="narrative-panel" class="panel active">
+          <div id="narrative-text"></div>
+          <div id="puzzle-box" style="display:none">
+            <div class="puzzle-icon">🔍</div>
+            <div id="puzzle-text"></div>
+          </div>
+          <p class="hint-text">← 点击左侧角色开始对话</p>
+        </div>
+
+        <!-- 对话面板 -->
+        <div id="chat-panel" class="panel">
+          <div id="chat-header">
+            <button id="btn-back-narrative" class="btn-small">← 返回</button>
+            <span id="chat-char-name"></span>
+            <span id="chat-trust-bar" class="trust-bar" title="信任度">
+              <span id="chat-trust-fill" class="trust-fill"></span>
+              <span id="chat-trust-label" class="trust-label">信任 50</span>
+            </span>
+          </div>
+          <div id="chat-messages"></div>
+          <div id="chat-input-area">
+            <textarea id="chat-input" placeholder="输入你想问的问题…" rows="1"></textarea>
+            <button id="btn-send" class="btn-primary" title="发送">➤</button>
+          </div>
+        </div>
+
+        <!-- 助手面板 -->
+        <div id="assistant-panel" class="panel">
+          <div id="assistant-header">
+            <button id="btn-back-from-assistant" class="btn-small">← 返回</button>
+            <span class="assistant-title">🤖 侦探助手</span>
+            <span class="badge badge-small" style="background:rgba(52,152,219,0.2);color:var(--info)">AI</span>
+          </div>
+          <div id="assistant-messages"></div>
+          <div id="assistant-input-area">
+            <textarea id="assistant-input" placeholder="和助手讨论案情…" rows="1"></textarea>
+            <button id="btn-send-assistant" class="btn-primary" title="发送">➤</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ========== 推理弹窗 ========== -->
+  <div id="theory-modal" class="modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <h3>🔍 提交推理</h3>
+      <p class="modal-hint">写下你对整个案件真相的推理。<br>包括：凶手是谁、当年发生了什么、为什么现在有人复仇。</p>
+      <textarea id="theory-input" placeholder="我认为当年的真相是……&#10;现在杀人的人是……&#10;因为……" rows="8"></textarea>
+      <div id="theory-feedback" style="display:none"></div>
+      <div class="modal-buttons">
+        <button id="btn-submit-theory" class="btn-primary">提交推理</button>
+        <button id="btn-cancel-theory" class="btn-outline">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 结局画面 ========== -->
+  <div id="ending-screen" class="screen">
+    <div class="ending-content">
+      <pre id="ending-text"></pre>
+      <button id="btn-restart" class="btn-primary">重新开始</button>
+    </div>
+  </div>
+
+  <!-- ========== 加载遮罩 ========== -->
+  <div id="loading-overlay" style="display:none">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">思考中…</p>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
